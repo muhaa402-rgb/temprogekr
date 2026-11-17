@@ -1,25 +1,34 @@
 from typing import List, Dict, Any
 
-def get_task_status_text(task: Dict[str, Any]) -> str:
-    if "status" in task:
-        return task["status"]
-    
-    is_completed = task.get("completed", False)
-    return "Выполнена" if is_completed else "Не выполнена"
-
-
-def format_task_list(tasks: List[Dict[str, Any]]) -> str: 
+def get_task_list(tasks: List[Dict[str, Any]]) -> Dict[str, Any]:
     if not tasks:
-        return "Список задач пуст"
-    lines = []
-    for index, task in enumerate(tasks, start=1):
-        title = task.get("title", "Без названия")
-        status = get_task_status_text(task)
-        lines.append(f"{index}. {title} — [{status}]")
-    return "\n".join(lines)
+        return {
+            "success": True,
+            "is_empty": True,
+            "message": "Список задач пуст",
+            "tasks": []
+        }
+
+    formatted_tasks = []
+    for task in tasks:
+        status_text = "Выполнена" if task.get("completed", False) else "Не выполнена"
+        formatted_tasks.append({
+            "id": task.get("id"),
+            "title": task.get("title"),
+            "status": status_text
+        })
+
+    return {
+        "success": True,
+        "is_empty": False,
+        "tasks": formatted_tasks
+    }
 
 
-def display_tasks(tasks: List[Dict[str, Any]]) -> None: # соо в кансоль 
-    output = format_task_list(tasks)
-    print(output)
-
+def print_task_list(tasks: List[Dict[str, Any]]) -> None: # соо в кансоль 
+    result = get_task_list(tasks)
+    if result["is_empty"]:
+        print(result["message"])
+        return
+    for item in result["tasks"]:
+        print(f"{item['id']}. {item['title']} — [{item['status']}]")
